@@ -28,7 +28,7 @@ CORS(app)
 # Keras stuff
 global graph
 graph = get_default_graph()
-model = load_model('main/Sentiment_NB_model.h5')
+model = load_model('Sentiment_NB_model.h5') 
 MAX_SEQUENCE_LENGTH = 300
 
 # Twitter
@@ -37,7 +37,7 @@ auth.set_access_token(app.config.get('ACCESS_TOKEN'), app.config.get('ACCESS_TOK
 api = tweepy.API(auth,wait_on_rate_limit=True)
 
 # loading tokenizer
-with open('main/tokenizer.pickle', 'rb') as handle:
+with open('tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
 
 def predict(text, include_neutral=True):
