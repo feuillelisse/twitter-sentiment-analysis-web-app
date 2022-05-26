@@ -28,7 +28,7 @@ CORS(app)
 # Keras stuff
 global graph
 graph = get_default_graph()
-model = load_model('main/Sentiment_CNN_model.h5')
+model = load_model('main/Sentiment_NB_model.h5')
 MAX_SEQUENCE_LENGTH = 300
 
 # Twitter
