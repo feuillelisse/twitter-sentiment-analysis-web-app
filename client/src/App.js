@@ -209,10 +209,10 @@ function App() {
     tweets.map(function (item, i) {
       var color = "#46BFBD";
 
-      if (item.label == "Neutral") {
+      if (item.label === "Neutral") {
         color = "#FDB45C";
       }
-      if (item.label == "Negative") {
+      if (item.label === "Negative") {
         color = "#F7464A";
       }
       return (
@@ -229,7 +229,7 @@ function App() {
       {showMainContent()}
       <div class="footer my-auto">
         <p>
-          Made with <h1 class="fa fa-heart" style={{ color: "#3949AB" }}></h1>{" "}
+          Made with <h1 class="fa fa-heart" style={{ color: "#3949AB" }}> (love) </h1>{" "}
           by Rohit Agrawal (
           <a href="https://github.com/agrawal-rohit">Github</a>)
         </p>

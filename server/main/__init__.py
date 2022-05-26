@@ -29,7 +29,7 @@ CORS(app)
 # Keras stuff
 global graph
 graph = get_default_graph()
-model = load_model('main/Sentiment_NB_model.h5') 
+model = pickle.load(open('main/Sentiment_NB_model.h5', 'rb'))
 MAX_SEQUENCE_LENGTH = 300
 
 # Twitter
