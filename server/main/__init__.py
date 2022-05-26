@@ -8,7 +8,16 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 import pickle
 from tensorflow.compat.v1 import get_default_graph
 import tensorflow.compat.v1 as tf
-import sklearn
+from sklearn.utils import shuffle
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import ComplementNB
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
+from sklearn import metrics
+from sklearn.metrics import *
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import roc_curve
 
 tf.disable_v2_behavior() 
 
