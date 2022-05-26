@@ -8,6 +8,8 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 import pickle
 from tensorflow.compat.v1 import get_default_graph
 import tensorflow.compat.v1 as tf
+import sklearn
+
 tf.disable_v2_behavior() 
 
 # --------------------------------------
