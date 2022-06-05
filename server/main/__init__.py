@@ -17,6 +17,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import confusion_matrix, classification_report
 
+from tensorflow.compat.v1 import get_default_graph
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior() 
+
 # --------------------------------------
 # BASIC APP SETUP
 # --------------------------------------
@@ -34,6 +38,8 @@ from flask_cors import CORS
 CORS(app)
 
 # Load Model
+global graph
+graph = get_default_graph()
 model = pickle.load(open('main/Sentiment-BNB.pickle', 'rb'))
 
 # Twitter
