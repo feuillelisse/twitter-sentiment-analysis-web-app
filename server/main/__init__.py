@@ -6,12 +6,6 @@ import tweepy
 import re
 import pickle
 import numpy as np
-import pandas as pd
-
-# plotting
-import seaborn as sns
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 
 # nltk
 from nltk.stem import WordNetLemmatizer
@@ -39,11 +33,8 @@ app.config.from_object(app_settings)
 from flask_cors import CORS
 CORS(app)
 
-# Keras stuff
-global graph
-graph = get_default_graph()
+# Load Model
 model = pickle.load(open('main/Sentiment-BNB.pickle', 'rb'))
-MAX_SEQUENCE_LENGTH = 300
 
 # Twitter
 auth = tweepy.OAuthHandler(app.config.get('CONSUMER_KEY'), app.config.get('CONSUMER_SECRET'))
