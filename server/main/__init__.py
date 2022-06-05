@@ -1,25 +1,27 @@
 import os
-import h5py
 from flask import Flask, request, jsonify
 import tweepy
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.preprocessing.text import Tokenizer
-import pickle
-from tensorflow.compat.v1 import get_default_graph
-import tensorflow.compat.v1 as tf
-from sklearn.utils import shuffle
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import ComplementNB
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import cross_val_score
-from sklearn import metrics
-from sklearn.metrics import *
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import roc_curve
 
-tf.disable_v2_behavior() 
+# utilities
+import re
+import pickle
+import numpy as np
+import pandas as pd
+
+# plotting
+import seaborn as sns
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+# nltk
+from nltk.stem import WordNetLemmatizer
+
+# sklearn
+from sklearn.naive_bayes import BernoulliNB
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import confusion_matrix, classification_report
 
 # --------------------------------------
 # BASIC APP SETUP
@@ -40,7 +42,7 @@ CORS(app)
 # Keras stuff
 global graph
 graph = get_default_graph()
-model = pickle.load(open('main/Sentiment_NB_model.h5', 'rb'))
+model = pickle.load(open('main/Sentiment-BNB.pickle', 'rb'))
 MAX_SEQUENCE_LENGTH = 300
 
 # Twitter
@@ -48,24 +50,72 @@ auth = tweepy.OAuthHandler(app.config.get('CONSUMER_KEY'), app.config.get('CONSU
 auth.set_access_token(app.config.get('ACCESS_TOKEN'), app.config.get('ACCESS_TOKEN_SECRET'))
 api = tweepy.API(auth,wait_on_rate_limit=True)
 
-# loading tokenizer
-with open('main/tokenizer.pickle', 'rb') as handle:
-    tokenizer = pickle.load(handle)
+# loading vectorizer
+with open('main/vectorizer-ngram-(1,2).pickle', 'rb') as handle:
+    vectorizer = pickle.load(handle)
+
+def preprocess(textdata):
+    processedText = []
+    
+    # Create Lemmatizer and Stemmer.
+    wordLemm = WordNetLemmatizer()
+    
+    # Defining regex patterns.
+    urlPattern        = r"((http://)[^ ]*|(https://)[^ ]*|( www\.)[^ ]*)"
+    userPattern       = '@[^\s]+'
+    alphaPattern      = "[^a-zA-Z0-9]"
+    sequencePattern   = r"(.)\1\1+"
+    seqReplacePattern = r"\1\1"
+    
+    for tweet in textdata:
+        tweet = tweet.lower()
+        
+        # Replace all URls with 'URL'
+        tweet = re.sub(urlPattern,' URL',tweet)
+        
+        # Replace all emojis.
+        for emoji in emojis.keys():
+            tweet = tweet.replace(emoji, "EMOJI" + emojis[emoji])
+            
+        # Replace @USERNAME to 'USER'.
+        tweet = re.sub(userPattern,' USER', tweet)
+        
+        # Replace all non alphabets.
+        tweet = re.sub(alphaPattern, " ", tweet)
+        
+        # Replace 3 or more consecutive letters by 2 letter.
+        tweet = re.sub(sequencePattern, seqReplacePattern, tweet)
+
+        tweetwords = ''
+        for word in tweet.split():
+            # Checking if the word is a stopword.
+            #if word not in stopwordlist:
+            if len(word)>1:
+                # Lemmatizing the word.
+                word = wordLemm.lemmatize(word)
+                tweetwords += (word+' ')
+            
+        processedText.append(tweetwords)
+        
+    return processedText
 
 def predict(text, include_neutral=True):
-    # Tokenize text
-    x_test = pad_sequences(tokenizer.texts_to_sequences([text]), maxlen=MAX_SEQUENCE_LENGTH)
+
+    # Vectorizer
+    textdata = vectorizer.transform(preprocess(text))
+
     # Predict
-    score = model.predict([x_test])[0]
-    if(score >=0.4 and score<=0.6):
+    pos, neg = model.predict_proba(textdata)[0]
+
+    if(pos >= 0.4 and pos <=0.6):
         label = "Neutral"
-    if(score <=0.4):
+    if(pos <=0.4):
         label = "Negative"
-    if(score >=0.6):
+    if(pos >=0.6):
         label = "Positive"
 
     return {"label" : label,
-        "score": float(score)} 
+        "score": float(pos)} 
 
 @app.route('/')
 def index():
@@ -77,7 +127,7 @@ def getsentiment():
     # if parameters are found, echo the msg parameter 
     if (request.args != None):  
         with graph.as_default():
-            data["predictions"] = predict(request.args.get("text"))
+            data["predictions"] = predict([request.args.get("text")])
         data["success"] = True
     return jsonify(data)
 
@@ -107,7 +157,7 @@ def gettweets():
         with graph.as_default():
             prediction = predict(tweet.full_text)
         temp["label"] = prediction["label"]
-        temp["score"] = prediction["score"]
+        temp["pos"] = prediction["pos"]
         tweets.append(temp)
     return jsonify({"results": tweets});
     
