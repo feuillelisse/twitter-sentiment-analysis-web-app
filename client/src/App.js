@@ -75,7 +75,7 @@ function App() {
 
     try {
       axios
-        .get("http://103.134.154.227:8000/analyzehashtag", {
+        .get("http://20.28.176.104:8000/analyzehashtag", {
           params: {
             text: term,
           },
@@ -109,7 +109,7 @@ function App() {
 
     try {
       axios
-        .get("http://103.134.154.227:8000/gettweets", {
+        .get("http://20.28.176.104:8000/gettweets", {
           params: {
             text: term,
           },
